@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EscrowEvent",
+  "description": "Decoded on-chain RiskEscrow.sol event, as persisted by the Go chain indexer. Implemented in Phase F.",
+  "type": "object",
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "enum": ["RiskEscrowCreated", "RiskEscrowSettled", "RiskEscrowRefunded"]
+    },
+    "deal_id": { "type": "integer" },
+    "quote_id": { "type": "string", "description": "Present on RiskEscrowCreated; the RiskQuote.quote_id consumed to create this deal." },
+    "settlement_deadline": { "type": "string", "format": "date-time", "description": "Present on RiskEscrowCreated; createdAt + RiskQuote.settlement_horizon. The deal becomes refundable once this passes unsettled." },
+    "tx_hash": { "type": "string" },
+    "log_index": { "type": "integer" },
+    "block_number": { "type": "integer" },
+    "block_timestamp": { "type": "string", "format": "date-time" },
+    "raw_log": { "type": "object" }
+  },
+  "required": ["event_type", "deal_id", "tx_hash", "log_index", "block_number"]
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RiskQuote",
+  "description": "Signed risk quote produced by the Python risk engine (quant/) and consumed by RiskEscrow.createEscrow() via RiskQuoteVerifier.sol (contracts/RiskQuoteVerifier.sol). Field set and EIP-712 struct are implemented as of Phase B; `signature` is produced by signing this struct (minus `signature` itself) under the EIP-712 domain {name: \"AskGeneRiskEscrow\", version: \"1\", chainId, verifyingContract: <RiskEscrow address>}. The risk engine (volatility/VaR/collateral pricing) is Phase D (quant/src/askgene_quant/{risk,policy,quotes}/); EIP-712 signing and the request-a-quote service are Phase E (quant/src/askgene_quant/signing/, quant/src/askgene_quant/service/).",
+  "type": "object",
+  "properties": {
+    "quote_id": { "type": "string", "format": "uuid", "description": "Maps to the on-chain bytes32 quoteId (e.g. keccak256 of this UUID). Single-use - RiskEscrow rejects replays." },
+    "depositor": { "type": "string", "description": "Address that must call createEscrow and fund the collateral; binds the quote to one depositor." },
+    "counterparty": { "type": "string", "description": "Address that receives the payout on settlement; binds the quote to one counterparty." },
+    "settlement_asset": { "type": "string", "description": "ERC-20 token address, or the zero address for the chain's native asset." },
+    "notional": { "type": "string", "description": "Fixed-point decimal string, 18 decimals (matches on-chain uint256). The contractual amount the counterparty is owed on settlement, before the platform fee." },
+    "required_collateral": { "type": "string", "description": "Fixed-point decimal string, 18 decimals (matches on-chain uint256). Must be >= notional; the engine prices the difference as a risk buffer. On settlement, only notional-minus-fee goes to the counterparty and the buffer (required_collateral - notional) is returned to the depositor - it is not counterparty income." },
+    "quote_expiration": { "type": "string", "format": "date-time", "description": "Deadline for using this quote to create an escrow; checked against block.timestamp on-chain. Governs quote acceptance only - see settlement_horizon for the resulting escrow's own settlement window." },
+    "settlement_horizon": { "type": "integer", "description": "Duration in seconds (e.g. 86400 for 1 day), bound into the signed quote. On-chain, the escrow's settlement_deadline = createdAt + settlement_horizon; the escrow becomes refundable once that deadline passes unsettled. Independent of quote_expiration. The engine will offer discrete horizons (1d/7d/14d/30d, etc), each priced with its own required_collateral." },
+    "model_version": { "type": "string" },
+    "risk_snapshot_hash": { "type": "string", "description": "keccak256 hash of the risk snapshot the quote was priced from" },
+    "signature": { "type": "string", "description": "EIP-712 signature over the fields above, produced with the risk oracle's signing key" }
+  },
+  "required": [
+    "quote_id",
+    "depositor",
+    "counterparty",
+    "settlement_asset",
+    "notional",
+    "required_collateral",
+    "quote_expiration",
+    "settlement_horizon",
+    "model_version",
+    "risk_snapshot_hash"
+  ]
+}

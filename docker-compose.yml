@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: askgene
+      POSTGRES_PASSWORD: askgene
+      POSTGRES_DB: askgene_quantfi
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # chain-indexer and quant-service are opt-in (`profiles: ["full"]`) -
+  # `docker compose up -d postgres` (the documented default) stays just
+  # Postgres. Run `docker compose --profile full up` for the rest; both
+  # of these services still need real inputs (a deployed contract
+  # address, a real signing key) that plain `up` has no way to supply,
+  # so making them opt-in avoids a confusing crash-on-start for anyone
+  # who only wanted the database.
+  #
+  # Note: the primary local-demo path is scripts/dev_stack.sh
+  # (`npm run stack`), not this file - a Hardhat node running on the
+  # host is awkward for a container here to reach. This profile exists
+  # for running the indexer/service against a real network (e.g. Amoy)
+  # without installing Go/Python locally.
+  chain-indexer:
+    build: ./services/chain-indexer
+    profiles: ["full"]
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://askgene:askgene@postgres:5432/askgene_quantfi
+      RPC_URL: ${RPC_URL:-https://rpc-amoy.polygon.technology}
+      CHAIN_ID: ${CHAIN_ID:-80002}
+      RISK_ESCROW_ADDRESS: ${NEXT_PUBLIC_RISK_ESCROW_ADDRESS}
+      START_BLOCK: ${START_BLOCK:-0}
+      CONFIRMATION_DEPTH: ${CONFIRMATION_DEPTH:-5}
+    ports:
+      - "8090:8090" # health endpoint
+
+  quant-service:
+    build: ./quant
+    profiles: ["full"]
+    environment:
+      # Required - the service fails fast at startup without it. Export
+      # it in the host shell before running `docker compose`; never put
+      # a real value in a committed compose file or .env file.
+      RISK_ORACLE_PRIVATE_KEY: ${RISK_ORACLE_PRIVATE_KEY}
+    ports:
+      - "8001:8001"
+
+volumes:
+  postgres_data:

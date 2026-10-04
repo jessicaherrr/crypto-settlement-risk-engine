@@ -1,0 +1,31 @@
+name: Python Tests
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'quant/**'
+      - '.github/workflows/python-tests.yml'
+  pull_request:
+    paths:
+      - 'quant/**'
+      - '.github/workflows/python-tests.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: quant
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm ci
+        working-directory: ${{ github.workspace }}
+      - run: pip install -e ".[dev,service]"
+      - run: pytest

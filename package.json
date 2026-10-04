@@ -1,0 +1,65 @@
+{
+  "name": "crypto-settlement-risk-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Risk-aware crypto escrow and settlement engine: Python quantitative risk modeling, Go blockchain infrastructure, Solidity on-chain execution, Next.js risk console",
+  "author": "Jessica He",
+  "license": "MIT",
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w apps/web",
+    "build": "npm run build -w apps/web",
+    "start": "npm run start -w apps/web",
+    "lint": "npm run lint -w apps/web",
+    "check-types": "npm run check-types -w apps/web",
+    "compile": "hardhat compile",
+    "test:contracts": "hardhat test",
+    "deploy:amoy": "hardhat run contracts/scripts/deploy.js --network polygonAmoy",
+    "deploy:local": "hardhat run contracts/scripts/deploy.js --network localhost",
+    "deploy:local:demo": "hardhat run contracts/scripts/deploy_local.js --network localhost",
+    "node": "hardhat node",
+    "verify": "hardhat verify",
+    "clean": "hardhat clean",
+    "migrate": "bash scripts/db_migrate.sh",
+    "abi:export": "node scripts/export_abi.js",
+    "abi:export:check": "node scripts/export_abi.js --check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:web": "npm run test -w apps/web",
+    "test:e2e": "bash scripts/e2e_local.sh",
+    "test:all": "npm run test:contracts && npm run abi:export:check && npm run lint && npm run check-types && npm run test:web",
+    "stack": "bash scripts/dev_stack.sh"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.12",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.11",
+    "@openzeppelin/contracts": "^5.4.0",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "dotenv": "^17.2.3",
+    "hardhat": "^2.22.19",
+    "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.5.11"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "quantitative-finance",
+    "risk-management",
+    "crypto-escrow",
+    "defi",
+    "polygon",
+    "smart-contracts",
+    "volatility-modeling",
+    "value-at-risk"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jessicaherrr/crypto-settlement-risk-engine.git"
+  }
+}
